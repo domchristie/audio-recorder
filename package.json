@@ -1,0 +1,21 @@
+{
+  "name": "lossless",
+  "version": "1.0.0",
+  "description": "Record lossless audio in the browser.",
+  "main": "index.js",
+  "scripts": {
+    "build-worker": "rollup -i src/worker.js -o dist/audio-recorder-worker.js -f esm --context this --watch",
+    "build-worklet": "rollup -i src/worklet.js -o dist/audio-recorder-worklet.js -f esm --watch",
+    "build-index": "rollup -i src/index.js -d dist -f esm --watch",
+    "build": "npm run build-worker && npm run build-worklet && npm run build-index",
+    "test": "rollup -c test/rollup.config.js && tape test/cjs/**/*-test.js"
+  },
+  "author": "Dom Christie",
+  "license": "ISC",
+  "devDependencies": {
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "sinon": "^7.5.0",
+    "tape": "^4.11.0"
+  }
+}
