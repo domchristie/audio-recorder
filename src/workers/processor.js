@@ -2,8 +2,8 @@ import Buffer from './buffer'
 import encoders from './encoders'
 
 export default class {
-  constructor (delegate) {
-    this.delegate = delegate
+  constructor (worker) {
+    this.worker = worker
     this.recording = false
   }
 
@@ -26,20 +26,20 @@ export default class {
       this.reset()
       this.sliceSizeInSamples = event.data.sliceSizeInSamples
       this.recording = true
-      this.delegate.message({ type: 'start' })
+      this.worker.message({ type: 'start' })
       break
     case 'pause':
       this.recording = false
-      this.delegate.message({ type: 'pause' })
+      this.worker.message({ type: 'pause' })
       break
     case 'resume':
       this.recording = true
-      this.delegate.message({ type: 'resume' })
+      this.worker.message({ type: 'resume' })
       break
     case 'stop':
       this.recording = false
       this.dump()
-      this.delegate.message({ type: 'stop' })
+      this.worker.message({ type: 'stop' })
       break
     case 'process':
       this.process(event.data.input)
@@ -64,7 +64,7 @@ export default class {
   }
 
   dump () {
-    this.delegate.message({
+    this.worker.message({
       type: 'dataavailable',
       buffer: this.encoder.encode(this.buffer.dump(), this.sampleRate)
     })

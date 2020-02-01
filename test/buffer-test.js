@@ -1,5 +1,5 @@
 import test from 'tape'
-import Buffer from '../src/buffer.js'
+import Buffer from '../src/workers/buffer.js'
 
 const frame1 = new Float32Array(2)
 frame1.set([0.0, 1.0], 0)

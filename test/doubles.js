@@ -26,11 +26,16 @@ export const sourceDouble = {
   context: contextDouble
 }
 
-export const processorProxyDouble = {
+export const workerAdapterDouble = {
   source: sourceDouble,
   context: contextDouble,
   node: new Promise((resolve, reject) => resolve({})),
   message: () => {}
+}
+
+export const workerDouble = {
+  message: () => {},
+  onmessage: () => {},
 }
 
 export const audioRecorderDouble = {

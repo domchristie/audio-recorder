@@ -1,5 +1,5 @@
 import { testFactory } from './helpers'
-import { sourceDouble, processorProxyDouble } from './doubles'
+import { sourceDouble, workerAdapterDouble } from './doubles'
 import AudioRecorder from '../src/audio-recorder'
 import { InvalidStateError } from '../src/errors'
 
@@ -11,12 +11,12 @@ const test = testFactory(
       workerUri: 'audio-recorder-worker.js',
       workletUri: 'audio-recorder-worklet.js'
     })
-    Object.defineProperty(object, 'processor', {
-      value: processorProxyDouble,
+    Object.defineProperty(object, 'workerAdapter', {
+      value: workerAdapterDouble,
     })
   },
   function teardown () {
-    processorProxyDouble.message = () => {}
+    workerAdapterDouble.message = () => {}
   }
 )
 
@@ -42,7 +42,7 @@ test('`start` sets the state to `recording`', (t) => {
 })
 
 test('`start` messages the processor', (t) => {
-  processorProxyDouble.message = (data) => {
+  workerAdapterDouble.message = (data) => {
     t.equal(data.type, 'record')
     t.equal(data.sliceSizeInSamples, null)
     t.end()
@@ -51,7 +51,7 @@ test('`start` messages the processor', (t) => {
 })
 
 test('`start` messages the processor with a slice size', (t) => {
-  processorProxyDouble.message = (data) => {
+  workerAdapterDouble.message = (data) => {
     t.equal(data.type, 'record')
     t.equal(data.sliceSizeInSamples, 44100)
     t.end()
@@ -74,7 +74,7 @@ test('`pause` sets the state to `paused`', (t) => {
 
 test('`pause` messages the processor', (t) => {
   object.start()
-  processorProxyDouble.message = (data) => {
+  workerAdapterDouble.message = (data) => {
     t.equal(data.type, 'pause')
     t.end()
   }
@@ -97,7 +97,7 @@ test('`resume` sets the state to `recording`', (t) => {
 test('`resume` messages the processor', (t) => {
   object.start()
   object.pause()
-  processorProxyDouble.message = (data) => {
+  workerAdapterDouble.message = (data) => {
     t.equal(data.type, 'resume')
     t.end()
   }
@@ -118,7 +118,7 @@ test('`stop` sets the state to `inactive`', (t) => {
 
 test('`stop` messages the processor', (t) => {
   object.start()
-  processorProxyDouble.message = (data) => {
+  workerAdapterDouble.message = (data) => {
     t.equal(data.type, 'stop')
     t.end()
   }

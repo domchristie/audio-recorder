@@ -1,10 +1,10 @@
 import { testFactory } from './helpers'
 import {
-  processorProxyDouble,
+  workerDouble,
   bufferDouble,
   encoderDouble
 } from './doubles'
-import Processor from '../src/processor'
+import Processor from '../src/workers/processor'
 
 function event (data) {
   return { data: data }
@@ -17,10 +17,10 @@ const input = [channel]
 let object
 const test = testFactory(
   function setup () {
-    object = new Processor(processorProxyDouble)
+    object = new Processor(workerDouble)
   },
   function teardown () {
-    processorProxyDouble.message = (() => {})
+    workerDouble.message = (() => {})
   }
 )
 
@@ -29,8 +29,8 @@ test('`recording` is initially false', (t) => {
   t.end()
 })
 
-test('`constructor` sets `delegate`', (t) => {
-  t.equal(object.delegate, processorProxyDouble)
+test('`constructor` sets `worker`', (t) => {
+  t.equal(object.worker, workerDouble)
   t.end()
 })
 
@@ -66,8 +66,8 @@ test('`record` message sets the `recording` to `true`', (t) => {
   t.end()
 })
 
-test('`record` message notifies the delegate', (t) => {
-  object.delegate.message = (event) => {
+test('`record` message notifies the worker', (t) => {
+  object.worker.message = (event) => {
     t.equal(event.type, 'start')
     t.end()
   }
@@ -80,8 +80,8 @@ test('`pause` message sets the `recording` to `false`', (t) => {
   t.end()
 })
 
-test('`pause` message notifies the delegate', (t) => {
-  object.delegate.message = (event) => {
+test('`pause` message notifies the worker', (t) => {
+  object.worker.message = (event) => {
     t.equal(event.type, 'pause')
     t.end()
   }
@@ -94,8 +94,8 @@ test('`resume` message sets the `recording` to `true`', (t) => {
   t.end()
 })
 
-test('`resume` message notifies the delegate', (t) => {
-  object.delegate.message = (event) => {
+test('`resume` message notifies the worker', (t) => {
+  object.worker.message = (event) => {
     t.equal(event.type, 'resume')
     t.end()
   }
@@ -104,7 +104,7 @@ test('`resume` message notifies the delegate', (t) => {
 
 const stopTest = testFactory(
   function setup (t) {
-    object = new Processor(processorProxyDouble)
+    object = new Processor(workerDouble)
     object.dump = () => t.pass()
   }
 )
@@ -115,13 +115,13 @@ stopTest('`stop` message sets the `recording` to `false`', (t) => {
   t.end()
 })
 
-stopTest('`stop` message notifies the delegate', (t) => {
-  object.delegate.message = (event) => {
+stopTest('`stop` message notifies the worker', (t) => {
+  object.worker.message = (event) => {
     t.equal(event.type, 'stop')
     t.end()
   }
   object.message(event({ type: 'stop' }))
-  object.delegate.message = () => {}
+  object.worker.message = () => {}
 })
 
 stopTest('`stop` calls `dump`', (t) => {
@@ -138,7 +138,7 @@ test('`process` message calls process with the input', (t) => {
 })
 
 test('`dump` message calls `dump`', (t) => {
-  object = new Processor(processorProxyDouble)
+  object = new Processor(workerDouble)
   object.dump = () => t.pass()
   object.message(event({ type: 'dump' }))
   t.end()
@@ -146,7 +146,7 @@ test('`dump` message calls `dump`', (t) => {
 
 const processTest = testFactory(
   function setup (t) {
-    object = new Processor(processorProxyDouble)
+    object = new Processor(workerDouble)
     object.dump = () => t.pass('processor#dump called')
     object.reset = () => t.pass('processor#reset called')
     Object.defineProperty(object, 'buffer', {
@@ -185,7 +185,7 @@ processTest('`process` dumps and resets if the `buffer` size is greater than the
   t.end()
 })
 
-test('`dump` messages the delegate with an encoded array buffer', (t) => {
+test('`dump` messages the worker with an encoded array buffer', (t) => {
   t.plan(4)
 
   const output = new ArrayBuffer(44)
@@ -204,8 +204,8 @@ test('`dump` messages the delegate with an encoded array buffer', (t) => {
     return output
   }
 
-  // Stub delegate#message
-  object.delegate.message = (event) => {
+  // Stub worker#message
+  object.worker.message = (event) => {
     t.equal(event.type, 'dataavailable')
     t.equal(event.buffer, output)
     t.end()
@@ -216,7 +216,7 @@ test('`dump` messages the delegate with an encoded array buffer', (t) => {
   // Teardown
   bufferDouble.dump = () => {}
   encoderDouble.encode = () => {}
-  object.delegate.message = () => {}
+  object.worker.message = () => {}
 })
 
 test('`reset` resets the buffer', (t) => {

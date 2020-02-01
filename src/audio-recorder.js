@@ -1,4 +1,4 @@
-import ProcessorProxy from './processor-proxy'
+import WorkerAdapter from './worker-adapter'
 import { InvalidStateError } from './errors'
 
 export default class {
@@ -11,15 +11,15 @@ export default class {
     this.listeners = {}
   }
 
-  get processor () {
-    return this._processor = this._processor || new ProcessorProxy(this, this.workletUri, this.workerUri)
+  get workerAdapter () {
+    return this._workerAdapter = this._workerAdapter || new WorkerAdapter(this, this.workletUri, this.workerUri)
   }
 
   start (timeslice) {
     if (this.state !== 'inactive') this._throwInvalidStateErrorFor('start')
     this.state = 'recording'
 
-    this.processor.message({
+    this.workerAdapter.message({
       type: 'record',
       sliceSizeInSamples: timeslice ? (this.context.sampleRate / 1000) * timeslice : null
     })
@@ -28,19 +28,19 @@ export default class {
   pause () {
     if (this.state === 'inactive') this._throwInvalidStateErrorFor('pause')
     this.state = 'paused'
-    this.processor.message({ type: 'pause' })
+    this.workerAdapter.message({ type: 'pause' })
   }
 
   resume () {
     if (this.state === 'inactive') this._throwInvalidStateErrorFor('resume')
     this.state = 'recording'
-    this.processor.message({ type: 'resume' })
+    this.workerAdapter.message({ type: 'resume' })
   }
 
   stop () {
     if (this.state === 'inactive') this._throwInvalidStateErrorFor('stop')
     this.state = 'inactive'
-    this.processor.message({ type: 'stop' })
+    this.workerAdapter.message({ type: 'stop' })
   }
 
   on (type, listener) {
