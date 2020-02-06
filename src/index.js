@@ -5,54 +5,64 @@ var audioContext
 var audioRecorder
 var source
 
-document.getElementById('mic').addEventListener('click', function () {
+var micButton = document.getElementById('mic')
+var recordButton = document.getElementById('record')
+var stopButton = document.getElementById('stop')
+var recording = document.getElementById('recording')
+
+// Get microphone access
+micButton.addEventListener('click', function () {
   audioContext = new AudioContext()
 
   navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then((stream) => {
     source = audioContext.createMediaStreamSource(stream)
-    recordSource(source)
+    hide(micButton)
+    show(recordButton)
   })
 })
 
-var audio = document.querySelector('audio')
-audio.onplay = function () {
-  audioContext = new AudioContext()
-  recordSource(audioContext.createMediaStreamSource(audio.mozCaptureStream()))
-}
+// Record
+recordButton.addEventListener('click', function () {
+  record(source)
+  show(stopButton)
+  hide(recordButton)
+})
 
-function recordSource (source) {
-  var channelCount = source.mediaStream.getAudioTracks()[0].getSettings().channelCount
-  if (channelCount) {
-    source.channelCountMode = 'explicit'
-    source.channelCount = channelCount
-  }
-
+function record (source) {
   audioRecorder = new AudioRecorder({
     source: source,
     workletUri: 'dist/audio-recorder-worklet.js',
     workerUri: 'dist/audio-recorder-worker.js'
   })
+
   audioRecorder.on('dataavailable', (event) => {
     const blob = new Blob([event.data.buffer], { type: 'audio/wav' })
     const blobUrl = URL.createObjectURL(blob)
     const audio = document.createElement('audio')
-    const anchor = document.createElement('a')
-    anchor.setAttribute('href', blobUrl)
-    const now = new Date()
-    anchor.setAttribute(
-      'download',
-      `recording-${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDay().toString().padStart(2, '0')}--${now.getHours().toString().padStart(2, '0')}-${now.getMinutes().toString().padStart(2, '0')}-${now.getSeconds().toString().padStart(2, '0')}.wav`
-    );
-    anchor.innerText = 'Download'
     audio.setAttribute('src', blobUrl)
     audio.setAttribute('controls', 'controls')
-    document.body.appendChild(audio)
-    document.body.appendChild(anchor)
+
+    var oldAudio = recording.firstElementChild
+    if (oldAudio) recording.replaceChild(audio, oldAudio)
+    else recording.appendChild(audio)
   })
 
   audioRecorder.start()
+}
 
-  setTimeout(function () {
-    audioRecorder.stop()
-  }, 6000)
+// Stop
+stopButton.addEventListener('click', function () {
+  show(recordButton)
+  hide(stopButton)
+  audioRecorder.stop()
+})
+
+// Utils
+
+function hide (element) {
+  element.setAttribute('hidden', '')
+}
+
+function show (element) {
+  element.removeAttribute('hidden')
 }

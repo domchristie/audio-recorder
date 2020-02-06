@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>Audio Recorder Demo</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+    }
+
+    main {
+      width: 100%;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    audio {
+      margin-top: 1em;
+    }
+  </style>
+  <script src="dist/index.js" defer></script>
+</head>
+<body>
+  <main>
+    <button id="mic">Access Microphone</button>
+
+    <button hidden id="record">Record</button>
+    <button hidden id="stop">Stop</button>
+
+    <div id="recording"></div>
+  </main>
+</body>
+</html>
