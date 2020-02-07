@@ -1,7 +1,7 @@
 import WorkerAdapter from './worker-adapter'
 import { InvalidStateError } from './errors'
 
-export default class {
+export default class AudioRecorder {
   constructor (options) {
     this.state = 'inactive'
     this.workletUri = options.workletUri
