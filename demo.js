@@ -17,6 +17,15 @@ import AudioRecorder from './dist/audio-recorder.js'
 
     navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then((stream) => {
       source = audioContext.createMediaStreamSource(stream)
+
+      audioRecorder = new AudioRecorder({
+        source: source,
+        workletUri: 'dist/audio-recorder-worklet.js',
+        workerUri: 'dist/audio-recorder-worker.js'
+      })
+
+      audioRecorder.on('dataavailable', renderAudio)
+
       hide(micButton)
       show(recordButton)
     })
@@ -24,38 +33,18 @@ import AudioRecorder from './dist/audio-recorder.js'
 
   // Record
   recordButton.addEventListener('click', function () {
-    record(source)
+    audioRecorder.start()
+    goRed()
     show(stopButton)
     hide(recordButton)
   })
 
-  function record (source) {
-    audioRecorder = new AudioRecorder({
-      source: source,
-      workletUri: 'dist/audio-recorder-worklet.js',
-      workerUri: 'dist/audio-recorder-worker.js'
-    })
-
-    audioRecorder.on('dataavailable', (event) => {
-      const blob = new Blob([event.data.buffer], { type: 'audio/wav' })
-      const blobUrl = URL.createObjectURL(blob)
-      const audio = document.createElement('audio')
-      audio.setAttribute('src', blobUrl)
-      audio.setAttribute('controls', 'controls')
-
-      var oldAudio = recording.firstElementChild
-      if (oldAudio) recording.replaceChild(audio, oldAudio)
-      else recording.appendChild(audio)
-    })
-
-    audioRecorder.start()
-  }
-
   // Stop
   stopButton.addEventListener('click', function () {
+    audioRecorder.stop()
+    unRed()
     show(recordButton)
     hide(stopButton)
-    audioRecorder.stop()
   })
 
   // UI Utils
@@ -65,5 +54,25 @@ import AudioRecorder from './dist/audio-recorder.js'
 
   function show (element) {
     element.removeAttribute('hidden')
+  }
+
+  function goRed () {
+    document.body.style.backgroundColor = 'red'
+  }
+
+  function unRed () {
+    document.body.style.backgroundColor = ''
+  }
+
+  function renderAudio (event) {
+    const blob = new Blob([event.data.buffer], { type: 'audio/wav' })
+    const blobUrl = URL.createObjectURL(blob)
+    const audio = document.createElement('audio')
+    audio.setAttribute('src', blobUrl)
+    audio.setAttribute('controls', 'controls')
+
+    var oldAudio = recording.firstElementChild
+    if (oldAudio) recording.replaceChild(audio, oldAudio)
+    else recording.appendChild(audio)
   }
 })()
