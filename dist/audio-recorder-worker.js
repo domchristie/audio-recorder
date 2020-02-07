@@ -30,13 +30,13 @@ class Buffer {
 }
 
 class Sample {
-  constructor (float) {
-    this.float = float;
+  constructor (value) {
+    this.value = value;
   }
 
-  toInt (base) {
-    const s = Math.max(-1, Math.min(1, this.float));
-    return s < 0 ? s * Math.pow(2, base - 1) : s * (Math.pow(2, base - 1) - 1)
+  scale (bitDepth) {
+    const s = Math.max(-1, Math.min(1, this.value));
+    return s < 0 ? s * Math.pow(2, bitDepth - 1) : s * (Math.pow(2, bitDepth - 1) - 1)
   }
 }
 
@@ -110,7 +110,7 @@ class WavEncoder {
     let offset = 44;
     for (var i = 0; i < this.samples.length; i++, offset += 2) {
       let sample = new Sample(this.samples[i]);
-      this._setInt16(offset, sample.toInt(this.bitDepth), true);
+      this._setInt16(offset, sample.scale(this.bitDepth), true);
     }
 
     return this.buffer

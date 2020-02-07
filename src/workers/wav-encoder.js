@@ -70,7 +70,7 @@ export default class {
     let offset = 44
     for (var i = 0; i < this.samples.length; i++, offset += 2) {
       let sample = new Sample(this.samples[i])
-      this._setInt16(offset, sample.toInt(this.bitDepth), true)
+      this._setInt16(offset, sample.scale(this.bitDepth), true)
     }
 
     return this.buffer
