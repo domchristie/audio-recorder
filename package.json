@@ -1,5 +1,5 @@
 {
-  "name": "lossless",
+  "name": "audio-recorder",
   "version": "1.0.0",
   "description": "Record lossless audio in the browser.",
   "main": "index.js",
